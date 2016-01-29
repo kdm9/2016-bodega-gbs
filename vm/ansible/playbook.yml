@@ -1,0 +1,12 @@
+---
+- hosts: all
+  remote_user: admin
+  become: yes
+  become_user: root
+
+  tasks:
+   - include: apt.yml
+   - include: secure.yml
+   #- include: users.yml
+   - include: software.yml
+

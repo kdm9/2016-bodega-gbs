@@ -1,0 +1,35 @@
+---
+
+- name: Install packaged informatics software
+  apt: state=latest pkg={{ item }}
+  with_items:
+    - fastqc
+    - seqtk
+    - parallel
+
+- name: Retreive stacks
+  get_url:
+    dest: /usr/local/src/
+    url: http://catchenlab.life.illinois.edu/stacks/source/stacks-1.35.tar.gz
+- name: Unpack stacks
+  unarchive:
+    copy: no
+    src: /usr/local/src/stacks-1.35.tar.gz
+    dest: /usr/local/src/
+- name: Install stacks
+  shell: ./configure && make install
+  args:
+    chdir: /usr/local/src/stacks-1.35
+    creates: /usr/local/bin/denovo-map.pl
+
+- name: Retreive axe
+  git:
+    dest: /usr/local/src/axe
+    repo: https://github.com/kdmurray91/axe
+    recursive: yes
+    version: 0.3.1
+- name: Install stacks
+  shell: mkdir build && cd build && cmake .. && make all test install
+  args:
+    chdir: /usr/local/src/axe
+    creates: /usr/local/bin/axe-demux
