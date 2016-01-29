@@ -49,14 +49,28 @@ GBS wet lab overview
 --------------------
 
 DNA is extracted as usual, and digested with a restriction enzyme (in our case,
-PstI). 
+PstI). Sticky-ended adaptors are ligated to digested fragments, and amplified
+using PCR. This also roughly size-selects for inserts between about 50 and 500
+bp. A gel- or bead-based clean up is used to refine this size selection.
+Individual libraies are quantified and pooled equimolar into a single pooled
+library that is sequenced in one Illumina lane (we use a HiSeq 2500, and have
+had issues with the two-dye chemistry). For a more detail description of the
+protocol, please see the paper describing the protcol [ElshireGBS]_.  
+An important and common modification to the original protocol is the use of
+combinatorial adaptors. This involves using modified adaptors such that the
+forward and reverse reads contain independent short nucleotide sequences that
+identifiy the sample. The Borevitz lab (and others) use barcodes of differing
+length, which avoids nucleotide imbalance that would occur if all reads
+contained the restriction site at the same position. Nucleotide imbalance
+causes the Illumina base-calling algorithms to fail.
 
 
 GBS data overview
 -----------------
 
 The most common form of GBS data you are likely to receive is a raw FASTQ file.
-This FASTQ file will contain a
+This FASTQ file will contain all reads from all samples that were sequenced in
+an Illumina lane.
 
 
 
@@ -108,7 +122,9 @@ Quality Control
 ---------------
 
 As is customary, the first step in the analysis of GBS data is to check the
-technical quality of the reads we have obtained. This is done with FastQC: ::
+technical quality of the reads we have obtained. This is done with FastQC:
+
+.. code-block:: shell
 
   fastqc -o Emel-lb1234 Emel-lb1234_R[12].fastq.gz
 
@@ -126,7 +142,9 @@ low read numbers).
 Demultiplexing is performed using Axe, as few other demultiplexers can handle
 the rather eclectic needs that GBS has. Barcodes differ in length, and are
 applied combinatorially (different of R1 and R2). The following incantation
-should to the trick: ::
+should to the trick:
+
+.. code-block:: shell
 
   mkdir -p demuxed
   axe-demux                         \
@@ -142,7 +160,7 @@ Axe will have demultiplexed reads into individual interleaved files, under the
 directory ``./demuxed``. Sample-wise read counts have been saved to the
 ``Emel-lb1234.stats`` file.
 
-::
+.. code-block:: shell
 
   axe <- read.delim("tab", stringsAsFactors=F)
   axe <- axe[axe$Sample != "No Barcode",]
@@ -159,7 +177,7 @@ other similar tools will work just as well. As we have many files now, we need
 to loop over each of them.  Since we have multiple cores to use, we can utilise
 GNU parallel instead of a simple for loop.
 
-::
+.. code-block:: shell
 
   cut -f 3 < Emel-lb1234.axe >Emel-lb1234.samples
   mkdir -p qcd report
@@ -180,9 +198,10 @@ TODO:
 - Add GNU parallel footnote
 
 
-Hocus Pocus
------------
+Variant calling
+---------------
 
+Stacks is used
 
 
 
