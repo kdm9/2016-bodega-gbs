@@ -1,7 +1,0 @@
----
-
-- name: UFW -- Allow port 22 only
-  ufw: rule=allow port=22
-
-- name: UFW -- enable ufw
-  ufw: state=enabled policy=deny

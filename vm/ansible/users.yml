@@ -1,5 +1,0 @@
----
-
-- name: UFW: Allow port 22 only
-  users: state=present 
-
