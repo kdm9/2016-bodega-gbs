@@ -1,5 +1,16 @@
 ---
 
+- name: APT -- Install devel packages
+  apt: state=latest pkg={{ item }}
+  with_items:
+    - git
+    - build-essential
+    - cmake
+    - libeigen3-dev
+    - libboost-all-dev
+    - libyaml-cpp-dev
+    - zlib1g-dev
+
 - name: Install packaged informatics software
   apt: state=latest pkg={{ item }}
   with_items:

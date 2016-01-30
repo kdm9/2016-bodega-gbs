@@ -1,0 +1,24 @@
+---
+
+################### SYSTEM SOFTWARE #######################
+- name: APT -- Update cache & packages
+  apt:
+    update_cache: yes
+    upgrade: full
+
+- name: APT -- Install base packages
+  apt: state=latest pkg={{ item }}
+  with_items:
+    - vim
+    - wget
+    - htop
+    - screen
+    - ufw
+    - apache2
+
+###################### SECURITY ###########################
+- name: UFW -- Allow port 22 only
+  ufw: rule=allow port=22
+
+- name: UFW -- enable ufw
+  ufw: state=enabled policy=deny

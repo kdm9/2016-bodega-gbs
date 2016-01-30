@@ -5,8 +5,6 @@
   become_user: root
 
   tasks:
-   - include: apt.yml
-   - include: secure.yml
-   #- include: users.yml
+   - include: system.yml
    - include: software.yml
 
