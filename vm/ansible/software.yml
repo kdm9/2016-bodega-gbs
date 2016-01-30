@@ -44,3 +44,15 @@
   args:
     chdir: /usr/local/src/axe
     creates: /usr/local/bin/axe-demux
+
+- name: Retreive libqcpp
+  git:
+    dest: /usr/local/src/libqcpp
+    repo: https://github.com/kdmurray91/libqcpp
+    recursive: yes
+    version: 0.1.6
+- name: Install libqcpp
+  shell: mkdir build && cd build && cmake .. && make all test install
+  args:
+    chdir: /usr/local/src/libqcpp
+    creates: /usr/local/bin/gbsqc
