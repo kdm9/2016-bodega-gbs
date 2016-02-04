@@ -17,8 +17,9 @@
     - fastqc
     - seqtk
     - parallel
+    - r-recommended
 
-- name: Retreive stacks
+- name: Retrieve stacks
   get_url:
     dest: /usr/local/src/
     url: http://catchenlab.life.illinois.edu/stacks/source/stacks-1.35.tar.gz
@@ -33,7 +34,7 @@
     chdir: /usr/local/src/stacks-1.35
     creates: /usr/local/bin/denovo-map.pl
 
-- name: Retreive axe
+- name: Retrieve axe
   git:
     dest: /usr/local/src/axe
     repo: https://github.com/kdmurray91/axe
@@ -45,12 +46,12 @@
     chdir: /usr/local/src/axe
     creates: /usr/local/bin/axe-demux
 
-- name: Retreive libqcpp
+- name: Retrieve qcpp
   git:
     dest: /usr/local/src/libqcpp
     repo: https://github.com/kdmurray91/libqcpp
     recursive: yes
-    version: 0.1.6
+    version: 0.1.7
 - name: Install libqcpp
   shell: mkdir build && cd build && cmake .. && make all test install
   args:
