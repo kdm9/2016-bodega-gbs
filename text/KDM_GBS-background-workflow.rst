@@ -3,7 +3,6 @@ Genotyping by Sequencing Analysis
 =================================
 
 
-
 Introduction
 ============
 
@@ -72,7 +71,17 @@ GBS data overview
 
 The most common form of GBS data you are likely to receive is a raw FASTQ file.
 This FASTQ file will contain all reads from all samples that were sequenced in
-an Illumina lane.
+an Illumina lane. You will also need some form of metadata table associating at
+least each sample's DNA barcode with sample name or ID, and likely also
+population and collection metadata where applicable. Various tools have
+different format requirements for this metadata, so some interconversion may be
+required (when is it not in bioinformatics!).
+
+Forgive the banality, but I should take this opportunity to emphasise the
+importance of backups, replication and versioning of both sequencing data *and*
+associated metadata. We've lost many thousands of dollars worth of GBS
+experiment due to failures in hardware, software or user.
+
 
 
 
@@ -164,6 +173,9 @@ Axe will have demultiplexed reads into individual interleaved files, under the
 directory ``./demuxed``. Sample-wise read counts have been saved to the
 ``Emel-lb1234.stats`` file.
 
+The following R script can be used to generate a histogram of read counts
+across all samples.
+
 .. code-block:: shell
 
   axe <- read.delim("tab", stringsAsFactors=F)
@@ -177,9 +189,9 @@ We need to remove both adaptor read-through and low-quality sections from our
 reads. Additionally, due to the rather inane requirement of Stacks that all
 reads be the same length, we need to enforce the truncation of long reads, and
 remove shorter reads. We use a tool of our own named gbsqc, but Trimmomatic and
-other similar tools will work just as well. As we have many files now, we need
-to loop over each of them.  Since we have multiple cores to use, we can utilise
-GNU parallel instead of a simple for loop.
+other similar tools will work just as well (albeit with more duct-tape). As we
+have many files now, we need to loop over each of them. Since we have multiple
+cores to use, we can utilise GNU parallel instead of a simple for loop.
 
 .. code-block:: shell
 
@@ -199,7 +211,7 @@ no contaminants are present in the reads.
 
 TODO:
 
-- Add GNU parallel footnote
+- Add GNU parallel footnote <++>
 
 
 Variant calling
@@ -211,7 +223,7 @@ Stacks works by clustering reads into loci, then detecting variation between
 
 This command will create a map file, an internal data format that stacks uses
 to represent its state. To produce a VCF file for further analysis, we use
-`populations.pl`. 
+`populations.pl`.
 
 
 
@@ -220,7 +232,7 @@ Pitfalls of GBS
 
 No protocol or method produces perfect data, and GBS certainly produces it's
 share of imperfections. Throughout this section, keep in mind that GBS is not
-designed as an absolute method able to defintively determine relatedness.
+designed as an absolute method able to definitively determine relatedness.
 Rather GBS is a cheap, reliable estimate of relatedness. For many, if not most,
 applications in population genetics, this is more than sufficient. The power
 of GBS far exceeds "traditional" methods like SSR or microsatelite markers.
@@ -232,7 +244,11 @@ Technical batch effects
 One artifact we sometimes see is artifacts of the library preparation protocol.
 In particular, we have seen cases where there is a strong lane effect on
 genetic signal. This was traced to inconsistent size selection. Also keep in
-mind that GBS relies o
+mind that GBS relies o<+FINISH THIS SENTENCE+>
+
+
+Input sample quality
+--------------------
 
 Input DNA quality can have a significant effect on the quality of results.
 Partially degraded DNA will form libraries of poor quality or low complexity,
@@ -240,10 +256,30 @@ and can lead to systematic effects if sample quality is confounded with
 biologically significant variables (which it often is).
 
 
+Sample heterogeneity
+--------------------
+
+Frequently the concentration of DNA in individual libraries is too low to
+reliably quantitiate. This can lead to quite variable coverage between samples,
+that in turn can cause inaccuracies in the calculation of relatedness. The best
+course of action in such a situation is simply to drop samples with too few
+reads. The exact definition of "too few" is debatable, but we frequently use
+500,000 reads as a hard cut off, and sometimes raise this to 1 million. Any
+other choice is probably equally valid and equally arbitrary.
+
+It is worth bearing this advice in mind as early as possible in the planning of
+GBS experiments. GBS is a high throughput method, and samples fail at greater
+frequency than other methods. If you have samples that are particularly
+important, please consider sequencing them in at least duplicate. This is
+especially true if your important samples are of lower quality (which they
+often are).
+
+
 Metadata mix-ups
 ----------------
 
-This is not at all GBS specific, but as previously mentioned
+This is not at all GBS specific, but as previously mentioned metadata is key to
+the interpretation of any GBS dataset.  <++FINISH THIS+>
 
 
 Contamination
@@ -273,9 +309,7 @@ The Teacher's Pet Section
 If you've managed to blaze through all the above, or are super-bored on the
 way home, here are some extra things to try.
 
-
-
-
+<+FILL IN OR REMOVE THIS SECTION+>
 
 References
 ==========
