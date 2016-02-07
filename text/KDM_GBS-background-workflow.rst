@@ -1,5 +1,5 @@
 =================================
-Genotyping by Sequencing Analysis
+Genotyping By Sequencing Analysis
 =================================
 
 
@@ -7,7 +7,7 @@ Introduction
 ============
 
 GBS is a fast, cheap and relatively easy way of assaying genetic variation in a
-very high throughput manner. This workshop will go hopefully show attendees
+very high throughput manner. This workshop will show attendees
 the way we analyse GBS data in the Borevitz lab.
 
 I'll go over both the theory of GBS and how we analyse it.
@@ -17,7 +17,6 @@ I'll go over both the theory of GBS and how we analyse it.
 
 Who am I?
 ---------
-
 
 ::
 
@@ -57,13 +56,16 @@ library that is sequenced in one Illumina lane (we use a HiSeq 2500, and have
 had issues with the two-dye chemistry). For a more detail description of the
 protocol, please see the paper describing the protocol [ElshireGBS]_.
 
+<++> DIAGRAM FROM ELSHIRE PAPER
+
 An important and common modification to the original protocol is the use of
 combinatorial adaptors. This involves using modified adaptors such that the
 forward and reverse reads contain independent short nucleotide sequences that
 identify the sample. The Borevitz lab (and others) use barcodes of differing
 length, which avoids nucleotide imbalance that would occur if all reads
 contained the restriction site at the same position. Nucleotide imbalance
-causes the Illumina base-calling algorithms to fail.
+causes the Illumina base-calling algorithms to fail [some students may need
+this idea explained / expanded]
 
 
 GBS data overview
@@ -83,8 +85,6 @@ associated metadata. We've lost many thousands of dollars worth of GBS
 experiment due to failures in hardware, software or user.
 
 
-
-
 Analysis of GBS data
 ====================
 
@@ -96,6 +96,8 @@ Workflow overview
 - QC reads with gbsqc_
 - Detect loci and call variants *de novo* using Stacks_
 - Plot PCoA of SNP matrix
+
+[MRC: insert sample plot to motivate the efforts]
 
 Data
 ----
@@ -150,7 +152,7 @@ You may remember our samples come in one big FASTQ file. This is not what we
 want, so we need to demultiplex the reads such that the samples are each in
 their own file. We do this before quality trimming, so that reads are not
 manipulated before being demultiplexed (as barcode sequences often have quite
-low read numbers).
+low quality scores).
 
 Demultiplexing is performed using Axe, as few other demultiplexers can handle
 the rather eclectic needs that GBS has. Barcodes differ in length, and are
@@ -173,13 +175,17 @@ Axe will have demultiplexed reads into individual interleaved files, under the
 directory ``./demuxed``. Sample-wise read counts have been saved to the
 ``Emel-lb1234.stats`` file.
 
-The following R script can be used to generate a histogram of read counts
-across all samples.
+The following R snippet can be used to generate a histogram of read counts
+across all samples. You can run it on the command line, or locally after
+downloading the stats file if you want to play around with other plots or
+stats.
 
-.. code-block:: shell
+.. code-block:: R
 
-  axe <- read.delim("tab", stringsAsFactors=F)
+  axe <- read.delim("Emel-lb1234.stats", stringsAsFactors=F)
+  # Remove count of reads without barcodes
   axe <- axe[axe$Sample != "No Barcode",]
+  hist(axe$ReadCounts)
 
 
 Quality and Adaptor Trimming
@@ -192,6 +198,8 @@ remove shorter reads. We use a tool of our own named gbsqc, but Trimmomatic and
 other similar tools will work just as well (albeit with more duct-tape). As we
 have many files now, we need to loop over each of them. Since we have multiple
 cores to use, we can utilise GNU parallel instead of a simple for loop.
+
+<++>Pre-prepare samples file
 
 .. code-block:: shell
 
@@ -220,10 +228,35 @@ Variant calling
 Stacks is used to assemble loci and call variants in a *de novo* fashion.
 Stacks works by clustering reads into loci, then detecting variation between
 
+.. code-block:: shell
 
-This command will create a map file, an internal data format that stacks uses
-to represent its state. To produce a VCF file for further analysis, we use
-`populations.pl`.
+    samples=`echo qcd/qc_S*_il.fastq.gz | sed 's/ / -s /g'`
+    denovo_map.pl \
+        -T 11 \
+        -t \
+        -S \
+        -b 1 \
+        -n 2 \
+        -o stacks_output \
+        -s $samples
+
+This command will create a population file, an internal data format that stacks
+uses to represent its state. To produce a VCF file for further analysis, we use
+the `populations` command from `stacks`.
+
+.. code-block:: shell
+
+    populations \
+        -t 11 \
+        -r 0.25 \
+        -p 4 \
+        -b 1 \
+        -P stacks_output \
+        -M emel_lball.map \
+        -e pstI \
+        --write_single_snp \
+        --vcf \
+        --fstats
 
 
 
@@ -236,7 +269,7 @@ designed as an absolute method able to definitively determine relatedness.
 Rather GBS is a cheap, reliable estimate of relatedness. For many, if not most,
 applications in population genetics, this is more than sufficient. The power
 of GBS far exceeds "traditional" methods like SSR or microsatelite markers.
-
+[MRC: citations needed :-)]
 
 Technical batch effects
 -----------------------
