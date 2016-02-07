@@ -85,6 +85,7 @@ associated metadata. We've lost many thousands of dollars worth of GBS
 experiment due to failures in hardware, software or user.
 
 
+
 Analysis of GBS data
 ====================
 
@@ -98,6 +99,7 @@ Workflow overview
 - Plot PCoA of SNP matrix
 
 [MRC: insert sample plot to motivate the efforts]
+
 
 Data
 ----
@@ -121,6 +123,7 @@ TODO:
 
  - Add papers about biology
 
+
 Metadata
 --------
 
@@ -140,9 +143,10 @@ done with FastQC:
 
 .. code-block:: shell
 
-  fastqc -o Emel-lb1234 Emel-lb1234_R[12].fastq.gz
+  mkdir -p fastqc
+  fastqc --extract -o fastqc Emel-lb1234_R[12].fastq.gz
 
-Inspect the FastQC HTML output (files under ``./Emel-lb1234/``).
+Inspect the FastQC HTML output (files under ``./fastqc/``).
 
 
 Demulitplexing
@@ -169,16 +173,14 @@ should to the trick:
         -t Emel-lb1234.stats        \
         -f Emel-lb1234_R1.fastq.gz  \
         -r Emel-lb1234_R2.fastq.gz  \
-        -I demuxed
+        -I demuxed/
 
 Axe will have demultiplexed reads into individual interleaved files, under the
 directory ``./demuxed``. Sample-wise read counts have been saved to the
-``Emel-lb1234.stats`` file.
-
-The following R snippet can be used to generate a histogram of read counts
-across all samples. You can run it on the command line, or locally after
-downloading the stats file if you want to play around with other plots or
-stats.
+``Emel-lb1234.stats`` file.  The following R snippet can be used to generate a
+histogram of read counts across all samples. You can run it on the command
+line, or locally after downloading the stats file if you want to play around
+with other plots or stats.
 
 .. code-block:: R
 
@@ -197,14 +199,14 @@ reads be the same length, we need to enforce the truncation of long reads, and
 remove shorter reads. We use a tool of our own named gbsqc, but Trimmomatic and
 other similar tools will work just as well (albeit with more duct-tape). As we
 have many files now, we need to loop over each of them. Since we have multiple
-cores to use, we can utilise GNU parallel instead of a simple for loop.
+cores to use, we can utilise GNU parallel instead of a simple for loop [#]_.
 
 <++>Pre-prepare samples file
 
 .. code-block:: shell
 
   cut -f 3 < Emel-lb1234.axe >Emel-lb1234.samples
-  mkdir -p qcd report
+  mkdir -p qcd reports
   cat Emel-lb1234.samples | parallel -j 4 --verbose \
     gbsqc -q 25                                     \
           -l 64                                     \
@@ -216,10 +218,8 @@ cores to use, we can utilise GNU parallel instead of a simple for loop.
 So now we have a directory containing a FASTQ file for each sample. In theory,
 no contaminants are present in the reads.
 
-
-TODO:
-
-- Add GNU parallel footnote <++>
+.. [#] In case you've never seen GNU parallel before, I urge you to look it up
+   and become familiar with its use. It sure comes in handy.
 
 
 Variant calling
@@ -230,14 +230,17 @@ Stacks works by clustering reads into loci, then detecting variation between
 
 .. code-block:: shell
 
-    samples=`echo qcd/qc_S*_il.fastq.gz | sed 's/ / -s /g'`
-    denovo_map.pl \
-        -T 11 \
-        -t \
-        -S \
-        -b 1 \
-        -n 2 \
-        -o stacks_output \
+    # This is a hack to prepare a list of -s samp1.fq -s samp2.fq ...
+    samples=$(for s in $(cat Emel-lb1234.samples);  \
+              do echo "-s qcd/${i}-qc_il.fastq.gz"; \
+              done)
+    denovo_map.pl                                   \
+        -T 11                                       \
+        -t                                          \
+        -S                                          \
+        -b 1                                        \
+        -n 2                                        \
+        -o stacks_output                            \
         -s $samples
 
 This command will create a population file, an internal data format that stacks
@@ -246,16 +249,16 @@ the `populations` command from `stacks`.
 
 .. code-block:: shell
 
-    populations \
-        -t 11 \
-        -r 0.25 \
-        -p 4 \
-        -b 1 \
-        -P stacks_output \
-        -M emel_lball.map \
-        -e pstI \
-        --write_single_snp \
-        --vcf \
+    populations                                     \
+        -t 11                                       \
+        -r 0.25                                     \
+        -p 4                                        \
+        -b 1                                        \
+        -P stacks_output                            \
+        -M emel_lball.map                           \
+        -e pstI                                     \
+        --write_single_snp                          \
+        --vcf                                       \
         --fstats
 
 
@@ -267,9 +270,8 @@ No protocol or method produces perfect data, and GBS certainly produces it's
 share of imperfections. Throughout this section, keep in mind that GBS is not
 designed as an absolute method able to definitively determine relatedness.
 Rather GBS is a cheap, reliable estimate of relatedness. For many, if not most,
-applications in population genetics, this is more than sufficient. The power
-of GBS far exceeds "traditional" methods like SSR or microsatelite markers.
-[MRC: citations needed :-)]
+applications in population genetics, this is more than sufficient.
+
 
 Technical batch effects
 -----------------------
