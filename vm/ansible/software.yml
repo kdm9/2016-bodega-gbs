@@ -10,6 +10,7 @@
     - libboost-all-dev
     - libyaml-cpp-dev
     - zlib1g-dev
+    - default-jre
 
 - name: Install packaged informatics software
   apt: state=latest pkg={{ item }}
