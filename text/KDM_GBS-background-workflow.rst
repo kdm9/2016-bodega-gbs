@@ -56,7 +56,7 @@ library that is sequenced in one Illumina lane (we use a HiSeq 2500, and have
 had issues with the two-dye chemistry). For a more detail description of the
 protocol, please see the paper describing the protocol [ElshireGBS]_.
 
-<++> DIAGRAM FROM ELSHIRE PAPER
+<+DIAGRAM FROM ELSHIRE PAPER+>
 
 An important and common modification to the original protocol is the use of
 combinatorial adaptors. This involves using modified adaptors such that the
@@ -168,7 +168,6 @@ should to the trick:
   mkdir -p demuxed
   axe-demux                         \
         -c                          \
-        -z 6                        \
         -b Emel-lb1234.axe          \
         -t Emel-lb1234.stats        \
         -f Emel-lb1234_R1.fastq.gz  \
@@ -201,17 +200,18 @@ other similar tools will work just as well (albeit with more duct-tape). As we
 have many files now, we need to loop over each of them. Since we have multiple
 cores to use, we can utilise GNU parallel instead of a simple for loop [#]_.
 
-<++>Pre-prepare samples file
+<+Pre-prepare samples file+>
 
 .. code-block:: shell
 
-  cut -f 3 < Emel-lb1234.axe >Emel-lb1234.samples
+  cut -f 3 < Emel-lb1234.axe | grep -v '^#' >Emel-lb1234.samples
   mkdir -p qcd reports
   cat Emel-lb1234.samples | parallel -j 4 --verbose \
     gbsqc -q 25                                     \
           -l 64                                     \
           -y reports/{}.yml                         \
           -y reports/{}.yml                         \
+          demuxed/{}_il.fastq                       \
       \| gzip \> qcd/{}-qc_il.fastq.gz
 
 
@@ -231,17 +231,18 @@ Stacks works by clustering reads into loci, then detecting variation between
 .. code-block:: shell
 
     # This is a hack to prepare a list of -s samp1.fq -s samp2.fq ...
-    samples=$(for s in $(cat Emel-lb1234.samples);  \
-              do echo "-s qcd/${i}-qc_il.fastq.gz"; \
-              done)
+    # but only for samples with enough reads, as there are some failed samples
+    # and stacks will fail if there are samples with no or too few reads.
+    samples=$(find qcd/ -type f -size +100k | xargs -l1 echo "-s")
+
     denovo_map.pl                                   \
-        -T 11                                       \
+        -T 4                                        \
         -t                                          \
         -S                                          \
         -b 1                                        \
         -n 2                                        \
         -o stacks_output                            \
-        -s $samples
+        $samples
 
 This command will create a population file, an internal data format that stacks
 uses to represent its state. To produce a VCF file for further analysis, we use
@@ -250,12 +251,10 @@ the `populations` command from `stacks`.
 .. code-block:: shell
 
     populations                                     \
-        -t 11                                       \
-        -r 0.25                                     \
-        -p 4                                        \
+        -t 4                                        \
+        -r 0.01                                     \
         -b 1                                        \
         -P stacks_output                            \
-        -M emel_lball.map                           \
         -e pstI                                     \
         --write_single_snp                          \
         --vcf                                       \
@@ -279,7 +278,8 @@ Technical batch effects
 One artifact we sometimes see is artifacts of the library preparation protocol.
 In particular, we have seen cases where there is a strong lane effect on
 genetic signal. This was traced to inconsistent size selection. Also keep in
-mind that GBS relies o<+FINISH THIS SENTENCE+>
+mind that GBS relies o
+<+FINISH THIS SENTENCE+>
 
 
 Input sample quality
@@ -314,7 +314,7 @@ Metadata mix-ups
 ----------------
 
 This is not at all GBS specific, but as previously mentioned metadata is key to
-the interpretation of any GBS dataset.  <++FINISH THIS+>
+the interpretation of any GBS dataset.  <+FINISH THIS+>
 
 
 Contamination
@@ -344,7 +344,15 @@ The Teacher's Pet Section
 If you've managed to blaze through all the above, or are super-bored on the
 way home, here are some extra things to try.
 
+
+TASSEL UNEAK
+------------
+
+An alterative variant caller for GBS data is the UNEAK variant caller. I've
+installed 
+
 <+FILL IN OR REMOVE THIS SECTION+>
+
 
 References
 ==========
