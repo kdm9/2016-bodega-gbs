@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: deploy
   remote_user: admin
   become: yes
   become_user: root
