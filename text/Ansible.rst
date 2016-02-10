@@ -5,7 +5,7 @@ Ansible: How I set up the VM
 
 Nobody expects the extra section
 
-.. image:: monty-python-spanish-inquisition.png
+.. image:: imgs/monty-python-spanish-inquisition.png
 
 -----------------------
 
