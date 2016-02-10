@@ -56,7 +56,10 @@ library that is sequenced in one Illumina lane (we use a HiSeq 2500, and have
 had issues with the two-dye chemistry). For a more detail description of the
 protocol, please see the paper describing the protocol [ElshireGBS]_.
 
-<+DIAGRAM FROM ELSHIRE PAPER+>
+.. figure:: imgs/elshire_protocol_1.png
+   :alt: elshire protocol
+
+   The molecular protocol of GBS, directly from [ElshireGBS]_.
 
 An important and common modification to the original protocol is the use of
 combinatorial adaptors. This involves using modified adaptors such that the
@@ -96,10 +99,15 @@ Workflow overview
 - Demultiplex reads with Axe_
 - QC reads with gbsqc_
 - Detect loci and call variants *de novo* using Stacks_
-- Plot PCoA of SNP matrix
 
-[MRC: insert sample plot to motivate the efforts]
 
+Quick Note On Makefiles
+-----------------------
+
+Given that you've seen makefiles before, I'm going to have a companion section
+for each code block that allows you to create a makefile to perform this
+pipeline. Feel free to copy-paste the commands or paste rules into your
+makefile. You only need to do one of these.
 
 Data
 ----
@@ -112,16 +120,32 @@ genomic projects are ongoing. Key to these projects is the determination of
 genetic relatedness between many hundred samples taken from remnant stands of
 *E. melliodora*.
 
+.. figure:: imgs/emelliodora.jpg
+  :alt: A nice tree!
+
+  *Eucalyptus meliodora* mature tree. From wikimedia commons, CC BY 3.0. See
+  https://commons.wikimedia.org/wiki/File:Eucalyptus_melliodora_1.jpg
+
+Obtaining the dataset
+^^^^^^^^^^^^^^^^^^^^^
+
+The data is available as a tarball at:
+
+    <+S3 URL+>
+
+You can download this using:
+
+.. code-block:: shell
+
+    wget <+S3 URL+>
+
+
 You have been given several data files:
 
 - ``Emel-lb1234_R1.fastq.gz`` and ``Emel-lb1234_R2.fastq.gz``: Raw read files
   (forward and reverse)
 - ``Emel-lb1234.axe``: The Axe keyfile, a mapping of DNA barcodes to sample
   names.
-
-TODO:
-
- - Add papers about biology
 
 
 Metadata
@@ -130,8 +154,8 @@ Metadata
 The information which any sequencing experiment generates is useless without
 well curated metadata. This sounds self-evident, however in our experience most
 issues that arise during the analysis of GBS data are caused but incorrect or
-missing metadata. The sample names associated with our samples are available
-`here </samples.axe>`_  (pre-formatted in the format Axe requires).
+missing metadata. The sample names associated with our sample barcodes have
+been pre-curated and are in the file ``Emel-lb1234.axe``.
 
 
 Quality Control
@@ -145,6 +169,15 @@ done with FastQC:
 
   mkdir -p fastqc
   fastqc --extract -o fastqc Emel-lb1234_R[12].fastq.gz
+
+
+Or in Make:
+
+.. code-block:: make
+
+    RAW_READS   := reads/Emel-lb1234_R1.fastq.gz reads/Emel-lb1234_R2.fastq.gz
+    AXE_KEY     := Emel-lb1234.axe
+
 
 Inspect the FastQC HTML output (files under ``./fastqc/``).
 
@@ -181,7 +214,9 @@ histogram of read counts across all samples. You can run it on the command
 line, or locally after downloading the stats file if you want to play around
 with other plots or stats.
 
-.. code-block:: R
+.. code-block:: shell
+
+   Rscript src/plot_read_nums.R
 
   axe <- read.delim("Emel-lb1234.stats", stringsAsFactors=F)
   # Remove count of reads without barcodes
@@ -199,8 +234,6 @@ remove shorter reads. We use a tool of our own named gbsqc, but Trimmomatic and
 other similar tools will work just as well (albeit with more duct-tape). As we
 have many files now, we need to loop over each of them. Since we have multiple
 cores to use, we can utilise GNU parallel instead of a simple for loop [#]_.
-
-<+Pre-prepare samples file+>
 
 .. code-block:: shell
 
@@ -261,15 +294,14 @@ the `populations` command from `stacks`.
         --fstats
 
 
-
 Pitfalls of GBS
 ===============
 
 No protocol or method produces perfect data, and GBS certainly produces it's
 share of imperfections. Throughout this section, keep in mind that GBS is not
 designed as an absolute method able to definitively determine relatedness.
-Rather GBS is a cheap, reliable estimate of relatedness. For many, if not most,
-applications in population genetics, this is more than sufficient.
+Rather **GBS is a cheap, reliable estimate of relatedness**. For many, if not
+most, applications in population genetics, this is more than sufficient.
 
 
 Technical batch effects
@@ -277,9 +309,34 @@ Technical batch effects
 
 One artifact we sometimes see is artifacts of the library preparation protocol.
 In particular, we have seen cases where there is a strong lane effect on
-genetic signal. This was traced to inconsistent size selection. Also keep in
-mind that GBS relies o
-<+FINISH THIS SENTENCE+>
+genetic signal. The following PCA is coloured by lane. These three lanes
+contain mostly mother trees (green) and mostly daughters (black and red).
+
+.. figure:: imgs/lane-effect.png
+   :alt: lane effect
+
+   A strong lane effect. Plot prepared by Megan Supple.
+
+
+This was traced to inconsistent size selection, as is shown in the following
+density plot.
+
+
+.. figure:: imgs/size-sel-hist.png
+   :alt: Poor size selection
+
+   This plot shows that two lanes differ in their size selection. Lane 5-8 was
+   size selected more strictly than lane 1-4, as shown by the absence of loci
+   over 300bp.
+
+Another source of these batch effects can be sequencing platform. We have seen
+cases where replicates failed to cluster as one lane was sequenced on a HiSeq
+2500 and one on a NextSeq.
+
+.. figure:: imgs/nextseq.jpg
+    :alt: Yay, nextseqs.
+
+    Who thought that adding all these Gs would be a good idea.
 
 
 Input sample quality
@@ -328,6 +385,8 @@ and a similar percentage of assembled loci come from fungal or bacterial
 endosymbionts of *Eucalyptus*. This is not limited to plant species, there are
 many organisms with similar microorgansimal communities.
 
+.. image:: imgs/emel_gbs_contamination.jpg
+
 If your samples are know or suspected to contain genetic material from other
 species, it may be worth using taxonomic read classification tools such as
 Kraken to partition reads into target and non-target species after QC, and
@@ -335,23 +394,6 @@ proceed with loci assembly and variant calling only with target species reads.
 An alternative is to use BLAST or similar tools to taxonomically classify the
 assembled loci, and exclude any non-target species' loci from the VCF file
 before any post-analysis.
-
-
-
-The Teacher's Pet Section
-=========================
-
-If you've managed to blaze through all the above, or are super-bored on the
-way home, here are some extra things to try.
-
-
-TASSEL UNEAK
-------------
-
-An alterative variant caller for GBS data is the UNEAK variant caller. I've
-installed 
-
-<+FILL IN OR REMOVE THIS SECTION+>
 
 
 References
