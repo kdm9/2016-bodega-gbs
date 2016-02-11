@@ -299,8 +299,10 @@ Variant calling
 ---------------
 
 Stacks is used to assemble loci and call variants in a *de novo* fashion
-[CatchenStacks]_.  Stacks works by clustering reads into loci, then detecting
-variation between
+[CatchenStacks]_.  Stacks works by clustering reads into loci (or stacks), then
+detecting variation between these stacks. Reads are condensed to unique (or
+near-unique) stacks with ``ustacks``. A pan-poulation catalog of stacks is made
+with ``cstacs``, and this is used to call variants across samples.
 
 .. code-block:: shell
 
