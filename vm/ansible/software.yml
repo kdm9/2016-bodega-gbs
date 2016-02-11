@@ -3,6 +3,8 @@
 - name: APT -- Install devel packages
   apt: state=latest pkg={{ item }}
   with_items:
+    - ncdu
+    - tree
     - git
     - build-essential
     - cmake
@@ -65,3 +67,11 @@
   pip:
     name: khmer
     version: 2.0
+
+- name: set matplotlibrc
+  lineinfile:
+    state: present
+    create: yes
+    owner: ubuntu
+    line: "backend: agg"
+    dest: /home/ubunutu/.matplotlibrc
