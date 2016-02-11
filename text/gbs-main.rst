@@ -132,10 +132,10 @@ Analysis of GBS data
 Workflow overview
 -----------------
 
-- Assess dataset quality with FastQC_
-- Demultiplex reads with Axe_
-- QC reads with gbsqc_
-- Detect loci and call variants *de novo* using Stacks_
+- Assess dataset quality with FastQC [#fqc]_
+- Demultiplex reads with Axe [#axe]_
+- QC reads with gbsqc [#gqc]_
+- Detect loci and call variants *de novo* using Stacks [#stk]_
 
 
 Data
@@ -201,7 +201,7 @@ Quality Control
 
 As is customary for all NGS analyses, the first step in the analysis of GBS
 data is to check the technical quality of the reads we have obtained. This is
-done with FastQC:
+done with FastQC[#fqc]_:
 
 .. code-block:: shell
 
@@ -301,14 +301,15 @@ Variant calling
 Stacks is used to assemble loci and call variants in a *de novo* fashion
 [CatchenStacks]_.  Stacks works by clustering reads into loci (or stacks), then
 detecting variation between these stacks. Reads are condensed to unique (or
-near-unique) stacks with ``ustacks``. A pan-poulation catalog of stacks is made
+near-unique) stacks with ``ustacks``. A pan-population catalog of stacks is made
 with ``cstacs``, and this is used to call variants across samples.
 
 .. code-block:: shell
 
     # This is a hack to prepare a list of -s samp1.fq -s samp2.fq ...
-    # but only for samples with enough reads, as there are some failed samples
-    # and stacks will fail if there are samples with no or too few reads.
+    # but only for samples with enough reads, as there are some failed
+    # samples # and stacks will fail if there are samples with no or too
+    # few reads.
     samples=$(find qcd/ -type f -size +100k | xargs -l1 echo "-s")
 
     mkdir -p stacks_output
@@ -475,11 +476,11 @@ many organisms with similar microorgansimal communities.
 
 If your samples are know or suspected to contain genetic material from other
 species, it may be worth using taxonomic read classification tools such as
-Kraken to partition reads into target and non-target species after QC, and
-proceed with loci assembly and variant calling only with target species reads.
-An alternative is to use BLAST or similar tools to taxonomically classify the
-assembled loci, and exclude any non-target species' loci from the VCF file
-before any post-analysis.
+Kraken [#kra]_ to partition reads into target and non-target species after QC,
+and proceed with loci assembly and variant calling only with target species
+reads.  An alternative is to use BLAST or similar tools to taxonomically
+classify the assembled loci, and exclude any non-target species' loci from the
+VCF file before any post-analysis.
 
 
 
@@ -502,7 +503,9 @@ Papers
 Tools
 -----
 
-.. _FastQC: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-.. _Axe: https://github.com/kdmurray91/axe
-.. _gbsqc: https://github.com/kdmurray91/libqcpp
-.. _Stacks: http://catchenlab.life.illinois.edu/stacks/
+.. [#fqc] FastQC: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+.. [#axe] Axe: https://github.com/kdmurray91/axe
+.. [#gqc] gbsqc: https://github.com/kdmurray91/libqcpp
+.. [#stk] Stacks: http://catchenlab.life.illinois.edu/stacks/
+.. [#par] parallel: https://www.gnu.org/software/parallel/
+.. [#kra] Kraken: http://ccb.jhu.edu/software/kraken/MANUAL.html

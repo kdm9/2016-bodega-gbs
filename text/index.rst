@@ -7,5 +7,6 @@
 .. toctree::
    :maxdepth: 1
 
-   KDM_GBS-background-workflow
-   Ansible
+   gbs-main
+
+.. Ansible
