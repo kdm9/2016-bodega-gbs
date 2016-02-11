@@ -364,7 +364,6 @@ We filter the SNP matrix by removing:
 This is too often done by eye, using custom R scripts. Please don't judge us!
 We sometimes do reproducible science too!
 
-
 PCA
 ---
 
@@ -373,6 +372,14 @@ a valid representation of the data. This is especially true in plant species,
 or any species with a lot of admixture or gene flow. So we nearly always use
 PCA to examine the relationships between samples. We often also plot PCA axes
 in 3D, using ``Rgl``.
+
+.. figure:: imgs/emel-pcoa.png
+    :alt: PCA
+
+    This is a PCoA of the eucalptus samples we have been analysing. This PCoA
+    shows the subtle isolation by distance that exists in the *Eucalypus
+    meliodora* populations we have analysed. The colours represent latitudinal
+    regions between Melbourne and Brisbane.
 
 
 
