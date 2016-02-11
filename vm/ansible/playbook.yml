@@ -1,8 +1,6 @@
 ---
-- hosts: deploy
-  remote_user: admin
-  become: yes
-  become_user: root
+- hosts: all
+  sudo: yes
 
   tasks:
    - include: system.yml

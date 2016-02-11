@@ -3,8 +3,6 @@
 - name: APT -- Install devel packages
   apt: state=latest pkg={{ item }}
   with_items:
-    - ncdu
-    - tree
     - git
     - build-essential
     - cmake
