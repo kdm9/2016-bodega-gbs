@@ -59,10 +59,10 @@
     chdir: /usr/local/src/libqcpp
     creates: /usr/local/bin/gbsqc
 
-- name: Install khmer 2.0
-  pip:
-    name: khmer
-    version: "2.0"
+# - name: Install khmer 2.0
+#   pip:
+#     name: khmer
+#     version: "2.0"
 
 - name: set matplotlibrc
   lineinfile:
