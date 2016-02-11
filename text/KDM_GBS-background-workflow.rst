@@ -208,6 +208,7 @@ done with FastQC:
   mkdir -p fastqc
   fastqc --extract -o fastqc reads/Emel-lb1234_R[12].fastq.gz
 
+  # Copy the fastqc output home
   scp -r gbsvm:/mnt/fastqc ./
 
 Inspect the FastQC HTML output (files under ``./fastqc/``).
@@ -247,12 +248,20 @@ with other plots or stats.
 
 .. code-block:: shell
 
-   Rscript src/plot_read_nums.R
+    cat <<EOF >plot_read_nums.R
+    axe <- read.delim("Emel-lb1234.stats", stringsAsFactors=F)
+    # Remove count of reads without barcodes
+    axe <- axe[axe$Sample != "No Barcode",]
+    pdf("read-hist.pdf")
+    hist(axe\$Count, breaks=50)
+    dev.off()
+    EOF
 
-  axe <- read.delim("Emel-lb1234.stats", stringsAsFactors=F)
-  # Remove count of reads without barcodes
-  axe <- axe[axe$Sample != "No Barcode",]
-  hist(axe$ReadCounts)
+    Rscript plot_read_nums.R
+
+    # Copy the plot output home
+    scp -r gbsvm:/mnt/read-hist.pdf ./
+
 
 
 Quality and Adaptor Trimming
