@@ -309,6 +309,8 @@ variation between
     # and stacks will fail if there are samples with no or too few reads.
     samples=$(find qcd/ -type f -size +100k | xargs -l1 echo "-s")
 
+    mkdir -p stacks_output
+
     denovo_map.pl                                   \
         -T 4                                        \
         -t                                          \
