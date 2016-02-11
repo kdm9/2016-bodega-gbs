@@ -298,8 +298,9 @@ no contaminants are present in the reads.
 Variant calling
 ---------------
 
-Stacks is used to assemble loci and call variants in a *de novo* fashion.
-Stacks works by clustering reads into loci, then detecting variation between
+Stacks is used to assemble loci and call variants in a *de novo* fashion
+[CatchenStacks]_.  Stacks works by clustering reads into loci, then detecting
+variation between
 
 .. code-block:: shell
 
@@ -481,6 +482,10 @@ Papers
     Genotyping-by-Sequencing (GBS) Approach for High Diversity Species.** *PLoS
     ONE* doi:`10.1371/journal.pone.0019379
     <https://dx.doi.org/10.1371/journal.pone.0019379>`_
+.. [CatchenStacks] Catchen, J. M., Amores, A., Hohenlohe, P., Cresko, W., &
+    Postlethwait, J. H. (2011). **Stacks: Building and Genotyping Loci De Novo
+    From Short-Read Sequences.** *G3: Genes, Genomes, Genetics*, 1(3), 171–182.
+    doi:`10.1534/g3.111.000240 <http://doi.org/10.1534/g3.111.000240>`_:w
 
 
 Tools
