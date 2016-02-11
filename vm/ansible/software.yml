@@ -62,7 +62,7 @@
 - name: Install khmer 2.0
   pip:
     name: khmer
-    version: 2.0
+    version: "2.0"
 
 - name: set matplotlibrc
   lineinfile:
