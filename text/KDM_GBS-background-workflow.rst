@@ -31,6 +31,11 @@ Feel free to contact me at kevin.murray@anu.edu.au about any part of this
 workshop. There is also my `github <https://github.com/kdmurray91>`_ and
 `personal website <https://kdmurray.id.au/>`_.
 
+.. figure:: imgs/canberra.png
+    :alt: CBR
+
+    I live here in Canberra. Not a bad place to be.
+
 
 VM Setup
 --------
@@ -40,15 +45,28 @@ Go ahead and start setting up the AWS instance. We need an
   - Ubuntu 14.04 HVM 64 bit
   - m3.2xlarge instance size
 
-To setup the virtual machine, we will use ansible. SSH into your VM and run:
+To setup the virtual machine, we will use Ansible. SSH into your VM and run:
 
 .. code-block:: shell
 
-    sudo pip install ansible
+    sudo apt-get update && \
+        sudo apt-get -yy upgrade && \
+        sudo apt-get -yy install ansible
 
-    cd /mnt
+    wget https://s3-us-west-1.amazonaws.com/emel1234/ansible.tar
+    tar xvf ansible.tar
+    ansible-playbook -i ansible/hosts ansible/playbook.yml
 
 
+In many cases below, I'll use ``gbsvm`` as the remote server name. Please add
+the following to your ``~/.ssh/config`` to use this verbatim, or work out what
+the ugly long command is. ::
+
+    Host gbsvm
+        HostName <YOUR PUBLIC IP>
+        IdentityFile <YOUR .pem or ~/.ssh/id_rsa>
+        IdentitiesOnly yes
+        User ubuntu
 
 
 
@@ -120,16 +138,6 @@ Workflow overview
 - Detect loci and call variants *de novo* using Stacks_
 
 
-Quick Note On Makefiles
------------------------
-
-Given that you've seen makefiles before, I'm going to have a companion section
-for each code block that allows you to create a makefile to perform this
-pipeline. Feel free to copy-paste the commands or paste rules into your
-makefile. You only need to do one of these.
-
-
-
 Data
 ----
 
@@ -158,9 +166,16 @@ You can download this using:
 
 .. code-block:: shell
 
+    sudo chown ubuntu /mnt
+    cd /mnt
+
     wget https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar
     wget https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar.sha
     sha512sum -c kdm-gbs.tar.sha
+
+    tar xvf kdm-gbs.tar
+
+    rm -f kdm-gbs.tar*
 
 
 You have been given several data files:
@@ -191,16 +206,9 @@ done with FastQC:
 .. code-block:: shell
 
   mkdir -p fastqc
-  fastqc --extract -o fastqc Emel-lb1234_R[12].fastq.gz
+  fastqc --extract -o fastqc reads/Emel-lb1234_R[12].fastq.gz
 
-
-Or in Make:
-
-.. code-block:: make
-
-    RAW_READS   := reads/Emel-lb1234_R1.fastq.gz reads/Emel-lb1234_R2.fastq.gz
-    AXE_KEY     := Emel-lb1234.axe
-
+  scp -r gbsvm:/mnt/fastqc ./
 
 Inspect the FastQC HTML output (files under ``./fastqc/``).
 
@@ -222,12 +230,12 @@ should to the trick:
 .. code-block:: shell
 
   mkdir -p demuxed
-  axe-demux                         \
-        -c                          \
-        -b Emel-lb1234.axe          \
-        -t Emel-lb1234.stats        \
-        -f Emel-lb1234_R1.fastq.gz  \
-        -r Emel-lb1234_R2.fastq.gz  \
+  axe-demux                                 \
+        -c                                  \
+        -b Emel-lb1234.axe                  \
+        -t Emel-lb1234.stats                \
+        -f reads/Emel-lb1234_R1.fastq.gz    \
+        -r reads/Emel-lb1234_R2.fastq.gz    \
         -I demuxed/
 
 Axe will have demultiplexed reads into individual interleaved files, under the
@@ -353,7 +361,8 @@ PCA
 Within a (putative or actual) species, dendrograms or trees are not always
 a valid representation of the data. This is especially true in plant species,
 or any species with a lot of admixture or gene flow. So we nearly always use
-PCA, and often plot PCA axes in 3D, using ``Rgl``.
+PCA to examine the relationships between samples. We often also plot PCA axes
+in 3D, using ``Rgl``.
 
 
 
