@@ -32,6 +32,25 @@ workshop. There is also my `github <https://github.com/kdmurray91>`_ and
 `personal website <https://kdmurray.id.au/>`_.
 
 
+VM Setup
+--------
+
+Go ahead and start setting up the AWS instance. We need an
+
+  - Ubuntu 14.04 HVM 64 bit
+  - m3.2xlarge instance size
+
+To setup the virtual machine, we will use ansible. SSH into your VM and run:
+
+.. code-block:: shell
+
+    sudo pip install ansible
+
+    cd /mnt
+
+
+
+
 
 What is GBS?
 ============
@@ -67,8 +86,8 @@ forward and reverse reads contain independent short nucleotide sequences that
 identify the sample. The Borevitz lab (and others) use barcodes of differing
 length, which avoids nucleotide imbalance that would occur if all reads
 contained the restriction site at the same position. Nucleotide imbalance
-causes the Illumina base-calling algorithms to fail [some students may need
-this idea explained / expanded]
+causes the Illumina base-calling algorithms to fail.
+
 
 
 GBS data overview
@@ -109,6 +128,8 @@ for each code block that allows you to create a makefile to perform this
 pipeline. Feel free to copy-paste the commands or paste rules into your
 makefile. You only need to do one of these.
 
+
+
 Data
 ----
 
@@ -131,13 +152,15 @@ Obtaining the dataset
 
 The data is available as a tarball at:
 
-    <+S3 URL+>
+    https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar
 
 You can download this using:
 
 .. code-block:: shell
 
-    wget <+S3 URL+>
+    wget https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar
+    wget https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar.sha
+    sha512sum -c kdm-gbs.tar.sha
 
 
 You have been given several data files:
@@ -293,6 +316,8 @@ the `populations` command from `stacks`.
         --vcf                                       \
         --fstats
 
+
+
 Next Steps
 ==========
 
@@ -305,7 +330,7 @@ output of the stacks pipeline, what you do is highly dependent on:
  - Your own biases
  - What you ate for breakfast last Wednesday
 
-However, I will brifely mention what we do.
+However, I will briefly mention what we do.
 
 
 Data filtering
@@ -405,13 +430,6 @@ especially true if your important samples are of lower quality (which they
 often are).
 
 
-Metadata mix-ups
-----------------
-
-This is not at all GBS specific, but as previously mentioned metadata is key to
-the interpretation of any GBS dataset.  <+FINISH THIS+>
-
-
 Contamination
 -------------
 
@@ -434,6 +452,7 @@ assembled loci, and exclude any non-target species' loci from the VCF file
 before any post-analysis.
 
 
+
 References
 ==========
 
@@ -444,6 +463,7 @@ Papers
     Genotyping-by-Sequencing (GBS) Approach for High Diversity Species.** *PLoS
     ONE* doi:`10.1371/journal.pone.0019379
     <https://dx.doi.org/10.1371/journal.pone.0019379>`_
+
 
 Tools
 -----
