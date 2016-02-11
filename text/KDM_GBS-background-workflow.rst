@@ -293,6 +293,44 @@ the `populations` command from `stacks`.
         --vcf                                       \
         --fstats
 
+Next Steps
+==========
+
+Yes, I'm stopping half way through. This is deliberate. Once you have the
+output of the stacks pipeline, what you do is highly dependent on:
+
+ - Your dataset
+ - Your question(s)
+ - Your advisor's biases
+ - Your own biases
+ - What you ate for breakfast last Wednesday
+
+However, I will brifely mention what we do.
+
+
+Data filtering
+--------------
+
+We filter the SNP matrix by removing:
+
+    - Loci with too few variant calls (Non-missing sample calls)
+    - Loci with too few reads
+    - Loci with too many heterozygous calls
+    - Samples with too few loci called
+
+This is too often done by eye, using custom R scripts. Please don't judge us!
+We sometimes do reproducible science too!
+
+
+PCA
+---
+
+Within a (putative or actual) species, dendrograms or trees are not always
+a valid representation of the data. This is especially true in plant species,
+or any species with a lot of admixture or gene flow. So we nearly always use
+PCA, and often plot PCA axes in 3D, using ``Rgl``.
+
+
 
 Pitfalls of GBS
 ===============
