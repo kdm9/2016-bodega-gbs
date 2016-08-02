@@ -12,6 +12,10 @@ the way we analyse GBS data in the Borevitz lab.
 
 I'll go over both the theory of GBS and how we analyse it.
 
+.. note::
+   The demonstration dataset mentioned here was available online but has been
+   removed. Suitable datasets are available from the author.
+
 .. contents::
 
 
