@@ -164,22 +164,15 @@ Obtaining the dataset
 
 The data is available as a tarball at:
 
-    https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar
+    https://edmund.anu.edu.au/~kevin/thirdweek-bodega-gbs-tutorial-workshop.tar
+
 
 You can download this using:
 
 .. code-block:: shell
 
-    sudo chown ubuntu /mnt
-    cd /mnt
-
-    wget https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar
-    wget https://s3-us-west-1.amazonaws.com/emel1234/kdm-gbs.tar.sha
-    sha512sum -c kdm-gbs.tar.sha
-
-    tar xvf kdm-gbs.tar
-
-    rm -f kdm-gbs.tar*
+    wget https://edmund.anu.edu.au/~kevin/thirdweek-bodega-gbs-tutorial-workshop.tar
+    tar xvf thirdweek-bodega-gbs-tutorial-workshop.tar
 
 
 You have been given several data files:
